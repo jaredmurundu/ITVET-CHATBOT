@@ -52,7 +52,7 @@ def send_result_email_with_attachment(to_email, body_text, attachment_path):
     except Exception as e:
         return False
 
-st.title("📄 ITVET Results Slip Bot")
+st.title("📄 ITVET Results Slip Request")
 
 reg_no = st.text_input("🎓 Enter your Registration Number (e.g. DCSC01/4296/2022)")
 student_email = st.text_input("📧 Enter your Email Address")
