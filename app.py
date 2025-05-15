@@ -6,7 +6,9 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.mime.application import MIMEApplication
 
-st.set_page_config(page_title="ITVET Results Bot", page_icon="📧")
+st.set_page_config(page_title="ITVET Result Bot", page_icon="📄")
+
+PDF_FILE = "sample_results.pdf"
 
 def extract_result_page(pdf_path, reg_no):
     try:
@@ -27,7 +29,7 @@ def extract_result_page(pdf_path, reg_no):
 def send_result_email_with_attachment(to_email, body_text, attachment_path):
     sender_email = "your_email@example.com"
     sender_password = "your_app_password"
-    subject = "Your ITVET Results Slip"
+    subject = "Your ITVET Result Slip"
 
     message = MIMEMultipart()
     message["From"] = sender_email
@@ -50,35 +52,26 @@ def send_result_email_with_attachment(to_email, body_text, attachment_path):
     except Exception as e:
         return False
 
-st.title("📄 ITVET Student Results Chatbot")
-
-with st.expander("📥 Upload the results PDF"):
-    uploaded_file = st.file_uploader("Upload results PDF", type=["pdf"])
-    if uploaded_file:
-        with open("results.pdf", "wb") as f:
-            f.write(uploaded_file.read())
-        st.success("PDF uploaded successfully.")
-
-st.markdown("---")
+st.title("📄 ITVET Results Slip Bot")
 
 reg_no = st.text_input("🎓 Enter your Registration Number (e.g. DCSC01/4296/2022)")
 student_email = st.text_input("📧 Enter your Email Address")
 
-if st.button("Get My Result Slip"):
-    if not reg_no:
+if st.button("📬 Send My Result"):
+    if not os.path.exists(PDF_FILE):
+        st.error("Result file not found.")
+    elif not reg_no:
         st.warning("Please enter your Registration Number.")
     elif not student_email:
         st.warning("Please enter your Email Address.")
-    elif not os.path.exists("results.pdf"):
-        st.error("Please upload the results PDF first.")
     else:
-        result_text, result_pdf = extract_result_page("results.pdf", reg_no)
+        result_text, result_pdf = extract_result_page(PDF_FILE, reg_no)
         if result_text and result_pdf:
-            st.text_area("📄 Result Found", result_text, height=300)
+            st.text_area("📄 Result Preview", result_text, height=300)
             sent = send_result_email_with_attachment(student_email, result_text, result_pdf)
             if sent:
-                st.success(f"✅ Result slip sent to {student_email}")
+                st.success(f"✅ Result sent to {student_email}")
             else:
-                st.error("❌ Failed to send email. Check credentials or internet.")
+                st.error("❌ Email failed. Check credentials or network.")
         else:
-            st.warning("No results found for that Registration Number.")
+            st.warning("❌ No result found for that Registration Number.")
