@@ -102,15 +102,23 @@ st.markdown("#### 2. Ask About ITVET (general inquiries)")
 user_question = st.text_input("❓ Type your question here", key="faq")
 
 faq_response_rules = {
+   faq_response_rules = {
     "entry": "📌 Entry Requirements:\n- Diploma: KCSE C- and above\n- Certificate: KCSE D plain and above",
     "certificate": "🎓 Certificate Courses:\n- Cooperative Management\n- Business Management",
     "diploma": "🎓 Diploma Courses:\n- Accounting & Finance, HR, IT, CS, Cyber Security, Tourism, Social Work, Supply Chain, PM, Cooperative Management…",
-    "mission": "🎯 Our Mission: Provide quality educ. in business & economics, nurturing innovation through research, training, consultancy, and partnerships.",
-    "vision": "👁️ Our Vision: To be the school of choice in business & economics in Kenya.",
+    "mission": "🎯 Mission: To provide quality education in business and economics through training, research, consultancy and linkages for sustainable economic empowerment.",
+    "vision": "👁️ Vision: To be the school of choice in business and economics in Kenya.",
     "objective": "🎯 Objectives:\n• Offer market-oriented programs\n• Promote research\n• Equip students with skills\n• Enhance innovation & partnerships",
     "service": "🛎️ Service Charter Highlights:\n• Missing Marks: 2 weeks\n• Result Slip: 15 minutes post-approval\n• Academic Certificates: 30 working days",
-    "location": "📍 Location: Karen campus, 20 km from Nairobi CBD on a serene 50-acre estate.",
-    "events": "📅 Upcoming: TVET curriculum reform, RPL rollout, TVET fairs (Mar-Apr 2025), CDAAC exams, apprenticeship programs."
+    "missing marks": "🛎️ Kindly use the Results tab to submit a missing marks request.",
+    "location": "📍 Campus: Karen, 20km from Nairobi CBD, on a 50-acre serene environment.",
+    "events": "📅 Events: TVET Reforms, Career Fairs, CDAAC Exams, Apprenticeship Program.",
+    "courses": "🎓 ITVET Offers:\n- Diploma in Computer Science, Applied Statistics, Cyber Security, Information Technology\n- Diploma in Cooperative Management, Agribusiness, Credit Management, Project Management, Supply Chain, Tourism, Catering, Social Work and more.",
+    "school": "🏫 ITVET is part of The Co-operative University of Kenya, located in Karen, Nairobi — a serene 50-acre learning environment about 20km from the CBD.",
+    "departments": "📚 ITVET has two departments:\n- Department of Computing & Mathematical Sciences\n- Department of Co-operatives, Business & Management Studies",
+    "admission": "📝 Admission:\n- Certificate: KCSE D plain\n- Diploma: KCSE C-\n- Fee: Ksh 500\n- Issued within 8 weeks after advert",
+    "results": "📄 Result slips: Issued free 15 minutes post-approval\nTranscripts and certificates: Within 30 working days",
+    "service charter": "📋 Charter:\n- Inquiries: Verbal (1 day), Email (2 days)\n- Missing Marks: 2 weeks\n- Certificates: 30 days\n- Disciplinary: 30 days\n- Clearance: 2 days"
 }
 
 if st.button("🔍 Get Answer"):
