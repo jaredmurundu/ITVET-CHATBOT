@@ -28,7 +28,7 @@ def extract_result_page(pdf_path, reg_no):
 
 def send_result_email_with_attachment(to_email, body_text, attachment_path):
     sender_email = "jaredmurundu7@gmail.com"
-    sender_password = "34262059@Ja"
+    sender_password = "34262059@JA"
     subject = "Your ITVET Result Slip"
 
     message = MIMEMultipart()
