@@ -7,7 +7,10 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.application import MIMEApplication
 
 # —————— App Configuration ——————
-st.set_page_config(page_title="ITVET Smart Chatbot", page_icon="🤖")
+st.markdown(
+    "<h1 style='text-align: center;'>🤖 ITVET Smart Chatbot</h1>",
+    unsafe_allow_html=True
+)
 
 PDF_FILE = "sample_results.pdf"
 ADMIN_EMAIL = "jmurundu@cuk.ac.ke"
