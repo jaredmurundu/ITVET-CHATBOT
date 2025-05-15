@@ -8,7 +8,7 @@ from email.mime.application import MIMEApplication
 
 # —————— App Configuration ——————
 st.markdown(
-    "<h1 style='text-align: center;'>🤖 ITVET Smart Chatbot</h1>",
+    "<h1 style='text-align: center;'>🤖 THE ITVET-CUK </h1>",
     unsafe_allow_html=True
 )
 
