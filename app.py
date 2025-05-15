@@ -99,7 +99,7 @@ if st.button("📬 Send My Result"):
 
 st.markdown("---")
 st.markdown("#### 2. Ask About ITVET (general inquiries)")
-user_question = st.text_input("❓ Type your question here", key="faq")
+user_question = st.text_input("❓ Welcome to the ITVET-CUK: How may i help you", key="faq")
 
 faq_response_rules = {
     "entry": "📌 Entry Requirements:\n- Diploma: KCSE C- and above\n- Certificate: KCSE D plain and above",
