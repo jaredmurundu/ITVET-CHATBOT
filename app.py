@@ -87,6 +87,7 @@ faq_response_rules = {
     "vision": "👁️ *Our Vision:*\nTo be the school of choice in business and economics in Kenya.",
     "objective": "🎯 *Our Objectives:*\n- Develop market-oriented academic programmes\n- Promote research and knowledge sharing\n- Equip students with startup/management skills\n- Enhance innovation and partnerships",
     "service": "🛎️ *Service Delivery Timeline Highlights:*\n- Missing Marks: 2 weeks\n- Academic Certificates: Within 30 working days\n- Result Slip: 15 minutes post-approval\n- Admission: 8 weeks after advert closure",
+    "Missing marks": "*Kindly follow up use the previous tab to request your mark",
     "location": "📍 *Institute Location:*\nThe campus is located in Karen, about 20km from Nairobi CBD, on a serene 50-acre parcel.",
     "events": "📅 *Upcoming Events:*\n- TVET Curriculum Reforms\n- RPL Implementation\n- TVET Fairs (Mar–Apr 2025)\n- CDAAC Exam Series\n- Apprenticeship Program\n- Digitization & Private Sector Partnerships"
 }
