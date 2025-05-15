@@ -75,9 +75,9 @@ if st.button("📬 Send My Result"):
                 st.error("❌ Email failed. Check credentials or network.")
         else:
             st.warning("❌ No result found for that Registration Number.")
-# 📘 General Questions Section with Admin Alert
+# 📘 General Questions Section with Admin Follow-Up
 st.markdown("### 💬 Ask About ITVET")
-user_question = st.text_input("❓ Type your question here")
+user_question = st.text_input("❓ Type your question here (e.g., 'What are the diploma courses?')")
 
 faq_response_rules = {
     "entry": "📌 *Entry Requirements:*\n- Diploma: KCSE C- (minus) and above\n- Certificate: KCSE D plain and above",
@@ -91,12 +91,12 @@ faq_response_rules = {
     "events": "📅 *Upcoming Events:*\n- TVET Curriculum Reforms\n- RPL Implementation\n- TVET Fairs (Mar–Apr 2025)\n- CDAAC Exam Series\n- Apprenticeship Program\n- Digitization & Private Sector Partnerships"
 }
 
-def notify_admin_unanswered_question(question):
+def notify_admin_unanswered_question(question, user_email):
     sender_email = "jmurundu@cuk.ac.ke"
     sender_password = "ylnf zlwk dvnr bqns"
     admin_email = "jmurundu@cuk.ac.ke"
-    subject = "❓ Unanswered Question from ITVET Chatbot"
-    body = f"A user asked a question that the bot could not answer:\n\n'{question}'\n\nPlease respond or update the bot."
+    subject = f"❓ Unanswered Question from Chatbot - [{user_email}]"
+    body = f"A user asked a question that the chatbot could not answer:\n\nQuestion: {question}\nUser Email: {user_email}\n\nYou can reply directly to the user."
 
     msg = MIMEMultipart()
     msg["From"] = sender_email
@@ -110,7 +110,7 @@ def notify_admin_unanswered_question(question):
             smtp.login(sender_email, sender_password)
             smtp.sendmail(sender_email, admin_email, msg.as_string())
     except Exception as e:
-        st.error("⚠️ Failed to notify admin about the unknown question.")
+        st.error("⚠️ Failed to notify the admin.")
 
 if st.button("🔍 Get Answer"):
     match_found = False
@@ -119,9 +119,15 @@ if st.button("🔍 Get Answer"):
             st.text_area("🤖 ITVET Answer", reply, height=200)
             match_found = True
             break
+
     if not match_found:
-        notify_admin_unanswered_question(user_question)
-        st.warning("🤔 I’m not sure about that yet. We've sent your question to the admin. Please check back later.")
+        user_email = st.text_input("📧 Enter your email to receive a reply from the admin")
+        if st.button("📨 Submit to Admin"):
+            if user_email:
+                notify_admin_unanswered_question(user_question, user_email)
+                st.success("✅ Your question has been sent. You'll get a reply from the admin via email.")
+            else:
+                st.warning("⚠️ Please enter your email to complete the request.")
 
 # Developer credit (centered)
 st.markdown("---")
