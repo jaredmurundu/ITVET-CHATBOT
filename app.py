@@ -78,7 +78,6 @@ def send_unanswered_question_to_admin(question, user_email):
 
 # —————— UI ——————
 
-st.title("🤖 ITVET Smart Chatbot")
 st.markdown("#### 1. Get Your Result Slip")
 col1, col2 = st.columns(2)
 with col1:
