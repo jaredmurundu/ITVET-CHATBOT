@@ -76,6 +76,15 @@ if st.button("📬 Send My Result"):
         else:
             st.warning("❌ No result found for that Registration Number.")
 
-# Developer credit
+# Developer credit (centered)
 st.markdown("---")
-st.markdown("👨‍💻 Developed by **Jared Murundu**  \n📊 Data Scientist | 💻 Software Developer")
+st.markdown(
+    """
+    <div style='text-align: center; margin-top: 50px; font-size: 15px;'>
+        👨‍💻 Developed by <strong>Jared Murundu</strong><br>
+        📊 Data Scientist | 💻 Software Developer
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
