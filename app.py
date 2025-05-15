@@ -99,7 +99,7 @@ if st.button("📬 Send My Result"):
 
 st.markdown("---")
 st.markdown("#### 2. Ask About ITVET (general inquiries)")
-user_question = st.text_input("❓ Welcome to the ITVET-CUK: How may i help you", key="faq")
+user_question = st.text_input("❓ Welcome to the ITVET-CUK: How may i help you?", key="faq")
 
 faq_response_rules = {
     "entry": "📌 Entry Requirements:\n- Diploma: KCSE C- and above\n- Certificate: KCSE D plain and above",
@@ -129,8 +129,8 @@ if st.button("🔍 Get Answer"):
     if reply:
         st.text_area("🤖 Answer", reply, height=200)
     else:
-        st.warning("🤔 I don’t have that info. Please enter your email so the admin can reply:")
-        ua = st.text_input("📧 Your Email for Admin Reply", key="faq_email")
+        st.warning("🤔 Will it be okay if we responded to this later?. Please enter your email so that the admin can reply:")
+        ua = st.text_input("📧 Please enter your Email address for Admin Reply", key="faq_email")
         if ua and "@" in ua:
             send_unanswered_question_to_admin(user_question, ua)
         elif ua:
