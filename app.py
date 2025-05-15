@@ -75,3 +75,7 @@ if st.button("📬 Send My Result"):
                 st.error("❌ Email failed. Check credentials or network.")
         else:
             st.warning("❌ No result found for that Registration Number.")
+
+# Developer credit
+st.markdown("---")
+st.markdown("👨‍💻 Developed by **Jared Murundu**  \n📊 Data Scientist | 💻 Software Developer")
