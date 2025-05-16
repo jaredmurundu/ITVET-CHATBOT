@@ -85,23 +85,13 @@ if mode == "Admin":
         login()
         st.stop()
 
-# ------------------- Footer -------------------
-st.markdown("""
----
-<div style='text-align: center;'>
-👨‍💻 Developed for <strong>ITVET-CUK</strong> by <strong><a href='https://www.linkedin.com/in/jared-murundu-07738b23a/' target='_blank'>Jared Murundu</a></strong><br>
-📊 Data Scientist | 💻 Software Developer
-</div>
----
-""", unsafe_allow_html=True)
-
     
 
     
 
 # ------------------- Public User Section -------------------
 st.markdown("---")
-st.markdown(f"<h3 style='text-align: center;'>"1️⃣ Get Your Result Slip"</h3>", unsafe_allow_html=True)
+st.markdown("<h3 style='text-align: center;'>1️⃣ Get Your Result Slip</h3>", unsafe_allow_html=True)
 reg_no = st.text_input("🎓 Registration Number")
 student_email = st.text_input("📧 Your Email")
 
@@ -128,7 +118,7 @@ if st.button("📬 Send My Result"):
             st.warning("❌ No results found for that Registration Number.")
 
 st.markdown("---")
-st.subheader("2️⃣ Ask About ITVET")
+st.markdown("<h3 style='text-align: center;'>2️⃣ Ask About ITVET</h3>", unsafe_allow_html=True)
 user_question = st.text_input("❓ Your Question")
 faq_response_rules = {
     "entry": "📌 Entry Requirements:\n- Diploma: KCSE C- and above\n- Certificate: KCSE D plain and above",
@@ -171,6 +161,16 @@ if st.button("🔍 Get Answer"):
             st.success("✅ Your query has been submitted. You will receive a response soon.")
         elif email:
             st.warning("⚠️ Please enter a valid email address.")
+
+# ------------------- Footer -------------------
+st.markdown("""
+---
+<div style='text-align: center;'>
+👨‍💻 Developed for <strong>ITVET-CUK</strong> by <strong><a href='https://www.linkedin.com/in/jared-murundu-07738b23a/' target='_blank'>Jared Murundu</a></strong><br>
+📊 Data Scientist | 💻 Software Developer
+</div>
+---
+""", unsafe_allow_html=True)
 
     
 
