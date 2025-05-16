@@ -165,10 +165,6 @@ st.markdown("---")
 st.subheader("2️⃣ Ask About ITVET")
 user_question = st.text_input("❓ Your Question")
 faq_response_rules = {
-    "entry": "📌 Entry Requirements:\n- Diploma: KCSE C- and above\n- Certificate: KCSE D plain and above",
-    "entry": "📌 Entry Requirements:
-- Diploma: KCSE C- and above
-- Certificate: KCSE D plain and above",
     "certificate": "🎓 Certificate Courses:
 - Cooperative Management
 - Business Management",
