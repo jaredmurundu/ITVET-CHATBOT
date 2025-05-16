@@ -18,12 +18,6 @@ SMTP_PASSWORD = "ylnf zlwk dvnr bqns"
 # ------------------- Session Data -------------------
 if "admin" not in st.session_state:
     st.session_state["admin"] = False
-if "unanswered_queries" not in st.session_state:
-    st.session_state["unanswered_queries"] = [
-        {"email": "student1@example.com", "question": "What is the deadline for fee payment?", "timestamp": "2024-05-01 10:23:45"},
-        {"email": "student2@example.com", "question": "How do I register for resits?", "timestamp": "2024-05-02 11:15:30"},
-        {"email": "student3@example.com", "question": "Is there weekend learning?", "timestamp": "2024-05-03 14:05:10"}
-    ]
 
 # ------------------- Admin Login -------------------
 def login():
@@ -96,16 +90,61 @@ if mode == "Admin":
 
     st.title("🛡️ ITVET Admin Dashboard")
 
-    st.markdown("### 📬 Unanswered Queries")
-    if st.session_state["unanswered_queries"]:
-        df = pd.DataFrame(st.session_state["unanswered_queries"])
-        st.dataframe(df)
-    else:
-        st.success("✅ No unanswered questions at the moment.")
+    st.markdown("### 📊 BI Dashboard: Query Insights")
+    total_queries = len(st.session_state.get("user_queries", []))
+    sent_requests = st.session_state.get("sent_results", [])
+    total_sent = len(sent_requests)
+
+    col1, col2 = st.columns(2)
+    col1.metric("Total Unanswered Queries", total_queries)
+    col2.metric("Total Sent Result Requests", total_sent) 
+
+    if total_queries > 0:
+        query_df = pd.DataFrame(st.session_state.get("user_queries", []))
+        for index, row in query_df.iterrows():
+            with st.expander(f"📩 {row['email']} | {row['timestamp']}"):
+                st.write(f"**Question:** {row['question']}")
+                response_key = f"response_{index}"
+                response = st.text_area("✍️ Enter response", key=response_key)
+                if st.button("📤 Send Response", key=f"send_{index}"):
+                    try:
+                        msg = MIMEMultipart()
+                        msg["From"] = SMTP_USER
+                        msg["To"] = row['email']
+                        msg["Subject"] = "Response to Your ITVET Inquiry"
+                        msg.attach(MIMEText(response, "plain"))
+                        with smtplib.SMTP("smtp.gmail.com", 587) as smtp:
+                            smtp.starttls()
+                            smtp.login(SMTP_USER, SMTP_PASSWORD)
+                            smtp.sendmail(SMTP_USER, row['email'], msg.as_string())
+                        st.success(f"✅ Response sent to {row['email']}")
+                    except Exception as e:
+                        st.error(f"❌ Failed to send email: {e}")
 
     st.markdown("---")
+    st.markdown("### 📄 Log of Sent Result Requests")
+    if "sent_results" not in st.session_state:
+        st.session_state["sent_results"] = []
+    if st.session_state["sent_results"]:
+        result_df = pd.DataFrame(st.session_state["sent_results"])
+        st.dataframe(result_df)
+    else:
+        st.info("📭 No result emails sent yet.")
+
+    st.stop()
+
+    if st.sidebar.button("🚪 Logout"):
+        confirm = st.sidebar.radio("Confirm logout?", ["No", "Yes"], index=0)
+        if confirm == "Yes":
+            st.session_state["admin"] = False
+            st.success("👋 You have been logged out successfully.")
+            st.experimental_rerun()
+
+    st.title("🛡️ ITVET Admin Dashboard")
+
+    
     st.markdown("### 📊 BI Dashboard: Query Insights")
-    total_queries = len(st.session_state["unanswered_queries"])
+    total_queries = len(st.session_state.get("user_queries", []))
     sent_requests = st.session_state.get("sent_results", [])
     total_sent = len(sent_requests)
 
@@ -114,8 +153,14 @@ if mode == "Admin":
     col2.metric("Total Sent Result Requests", total_sent)
 
     if total_queries > 0:
-        query_df = pd.DataFrame(st.session_state["unanswered_queries"])
-        st.bar_chart(query_df["timestamp"].str[:10].value_counts().sort_index())
+        query_df = pd.DataFrame(st.session_state.get("user_queries", []))
+        for index, row in query_df.iterrows():
+            with st.expander(f"📩 {row['email']} | {row['timestamp']}"):
+                st.write(f"**Question:** {row['question']}")
+                response_key = f"response_{index}"
+                response = st.text_area("✍️ Enter response", key=response_key)
+                if st.button("📤 Send Response", key=f"send_{index}"):
+                    st.success(f"✅ Response to {row['email']} recorded: {response}")
 
     st.markdown("---")
     st.markdown("### 📄 Log of Sent Result Requests")
