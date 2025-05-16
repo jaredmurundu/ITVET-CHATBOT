@@ -6,34 +6,35 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.mime.application import MIMEApplication
 
-# —————— App Configuration ——————
-st.markdown(
-    "<h1 style='text-align: center;'>🤖 THE ITVET-CUK </h1>",
-    unsafe_allow_html=True
-)
-
-PDF_FILE = "sample_results.pdf"
+# —————— Configuration ——————
+PDF_FILE = os.path.join(os.getcwd(), "sample_results.pdf")
 ADMIN_EMAIL = "jmurundu@cuk.ac.ke"
-SMTP_USER = "jmurundu@cuk.ac.ke"       # your bot’s SMTP-enabled account
-SMTP_PASSWORD = "ylnf zlwk dvnr bqns"   # your Gmail app password
+SMTP_USER = "jmurundu@cuk.ac.ke"
+SMTP_PASSWORD = "ylnf zlwk dvnr bqns"  # Use app password if Gmail
 
-# —————— Helper Functions ——————
+st.set_page_config(page_title="ITVET Smart Chatbot", page_icon="🤖")
+st.markdown("<h1 style='text-align: center;'>🤖 THE ITVET-CUK</h1>", unsafe_allow_html=True)
 
+# —————— Function: Extract Result Page ——————
 def extract_result_page(pdf_path, reg_no):
     try:
         doc = fitz.open(pdf_path)
         for i in range(len(doc)):
-            text = doc[i].get_text()
-            if reg_no.lower() in text.lower():
+            text = doc[i].get_text("text")
+            cleaned_text = text.replace(" ", "").replace("\n", "").lower()
+            cleaned_reg = reg_no.replace("/", "").replace(" ", "").lower()
+            if cleaned_reg in cleaned_text:
                 out_pdf = f"Result_{reg_no.replace('/', '_')}.pdf"
                 result_doc = fitz.open()
                 result_doc.insert_pdf(doc, from_page=i, to_page=i)
                 result_doc.save(out_pdf)
                 return text, out_pdf
         return None, None
-    except:
+    except Exception as e:
+        st.error(f"Error extracting result: {e}")
         return None, None
 
+# —————— Function: Send Result Email ——————
 def send_result_email(to_email, body_text, attachment_path):
     msg = MIMEMultipart()
     msg["From"] = SMTP_USER
@@ -53,6 +54,7 @@ def send_result_email(to_email, body_text, attachment_path):
     except Exception as e:
         st.error(f"❌ Failed to send result: {e}")
 
+# —————— Function: Notify Admin of Unanswered Question ——————
 def send_unanswered_question_to_admin(question, user_email):
     subject = f"❓ Unanswered Chatbot Question from [{user_email}]"
     body = (
@@ -76,14 +78,14 @@ def send_unanswered_question_to_admin(question, user_email):
     except Exception as e:
         st.error(f"❌ Failed to notify admin: {e}")
 
-# —————— UI ——————
-
+# —————— UI: Result Request ——————
 st.markdown("#### 1. Get Your Result Slip")
 col1, col2 = st.columns(2)
 with col1:
     reg_no = st.text_input("🎓 Registration Number", key="reg")
 with col2:
     student_email = st.text_input("📧 Your Email", key="email")
+
 if st.button("📬 Send My Result"):
     if not os.path.exists(PDF_FILE):
         st.error("Result file not found on server.")
@@ -99,9 +101,10 @@ if st.button("📬 Send My Result"):
         else:
             st.warning("❌ No results found for that Registration Number.")
 
+# —————— UI: FAQ Chatbot ——————
 st.markdown("---")
 st.markdown("#### 2. Ask About ITVET (general inquiries)")
-user_question = st.text_input("❓ Welcome to the ITVET-CUK: How may i help you?", key="faq")
+user_question = st.text_input("❓ Welcome to the ITVET-CUK: How may I help you?", key="faq")
 
 faq_response_rules = {
     "entry": "📌 Entry Requirements:\n- Diploma: KCSE C- and above\n- Certificate: KCSE D plain and above",
@@ -131,13 +134,14 @@ if st.button("🔍 Get Answer"):
     if reply:
         st.text_area("🤖 Answer", reply, height=200)
     else:
-        st.warning("🤔 Will it be okay if we responded to this later?. Please enter your email so that the admin can reply:")
+        st.warning("🤔 Will it be okay if we responded to this later? Please enter your email so that the admin can reply:")
         ua = st.text_input("📧 Please enter your Email address for Admin Reply", key="faq_email")
         if ua and "@" in ua:
             send_unanswered_question_to_admin(user_question, ua)
         elif ua:
             st.warning("⚠️ Please enter a valid email address.")
 
+# —————— Footer ——————
 st.markdown("---")
 st.markdown(
     """
