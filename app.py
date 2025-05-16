@@ -71,8 +71,18 @@ def send_result_email(to_email, body_text, attachment_path):
         st.error(f"❌ Failed to send result: {e}")
 
 # ------------------- Main App -------------------
+# 👨‍💻 Developed for ITVET-CUK by Jared Murundu
+# 📊 Data Scientist | 💻 Software Developer
 st.set_page_config(page_title="ITVET Chatbot", page_icon="🤖")
-st.title("🤖 ITVET-CUK SMART CHARTBOAT")
+st.title("🤖 ITVET-CUK Smart Chatbot")
+st.markdown("""
+---
+<div style='text-align: center;'>
+👨‍💻 Developed for <strong>ITVET-CUK</strong> by <strong><a href='https://www.linkedin.com/in/jared-murundu-07738b23a/' target='_blank'>Jared Murundu</a></strong><br>
+📊 Data Scientist | 💻 Software Developer
+</div>
+---
+""", unsafe_allow_html=True)
 
 mode = st.radio("Select User Type", ["User", "Admin"], horizontal=True)
 
