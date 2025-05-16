@@ -72,12 +72,11 @@ def send_result_email(to_email, body_text, attachment_path):
 
 # ------------------- Main App -------------------
 
-<div style='text-align: center;'>
-👨‍💻 Developed for <strong>ITVET-CUK</strong> by <strong><a href='https://www.linkedin.com/in/jared-murundu-07738b23a/' target='_blank'>Jared Murundu</a></strong><br>
-📊 Data Scientist | 💻 Software Developer
-</div>
----
-""", unsafe_allow_html=True)
+# 👨‍💻 Developed for ITVET-CUK by Jared Murundu
+# 📊 Data Scientist | 💻 Software Developer
+st.set_page_config(page_title="ITVET Chatbot", page_icon="🤖")
+st.markdown("<h1 style='text-align: center;'>🤖 ITVET-CUK Smart Chatbot</h1>", unsafe_allow_html=True)
+
 
 mode = st.radio("Select User Type", ["User", "Admin"], horizontal=True)
 
@@ -86,13 +85,23 @@ if mode == "Admin":
         login()
         st.stop()
 
+# ------------------- Footer -------------------
+st.markdown("""
+---
+<div style='text-align: center;'>
+👨‍💻 Developed for <strong>ITVET-CUK</strong> by <strong><a href='https://www.linkedin.com/in/jared-murundu-07738b23a/' target='_blank'>Jared Murundu</a></strong><br>
+📊 Data Scientist | 💻 Software Developer
+</div>
+---
+""", unsafe_allow_html=True)
+
     
 
     
 
 # ------------------- Public User Section -------------------
 st.markdown("---")
-st.subheader("1️⃣ Get Your Result Slip")
+st.markdown(f"<h3 style='text-align: center;'>"1️⃣ Get Your Result Slip"</h3>", unsafe_allow_html=True)
 reg_no = st.text_input("🎓 Registration Number")
 student_email = st.text_input("📧 Your Email")
 
@@ -165,12 +174,7 @@ if st.button("🔍 Get Answer"):
 
     
 
-# 👨‍💻 Developed for ITVET-CUK by Jared Murundu
-# 📊 Data Scientist | 💻 Software Developer
-st.set_page_config(page_title="ITVET Chatbot", page_icon="🤖")
-st.title("🤖 ITVET-CUK Smart Chatbot")
-st.markdown("""
----
+    
 
     
 
