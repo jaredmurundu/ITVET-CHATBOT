@@ -72,7 +72,7 @@ def send_result_email(to_email, body_text, attachment_path):
 
 # ------------------- Main App -------------------
 st.set_page_config(page_title="ITVET Chatbot", page_icon="🤖")
-st.title("🤖 ITVET-CUK Smart Chatbot")
+st.title("🤖 ITVET-CUK SMART CHARTBOAT")
 
 mode = st.radio("Select User Type", ["User", "Admin"], horizontal=True)
 
