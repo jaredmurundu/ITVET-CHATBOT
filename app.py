@@ -86,6 +86,48 @@ if mode == "Admin":
     if not st.session_state["admin"]:
         login()
         st.stop()
+
+    if st.sidebar.button("🚪 Logout"):
+        confirm = st.sidebar.radio("Confirm logout?", ["No", "Yes"], index=0)
+        if confirm == "Yes":
+            st.session_state["admin"] = False
+            st.success("👋 You have been logged out successfully.")
+            st.experimental_rerun()
+
+    st.title("🛡️ ITVET Admin Dashboard")
+
+    st.markdown("### 📬 Unanswered Queries")
+    if st.session_state["unanswered_queries"]:
+        df = pd.DataFrame(st.session_state["unanswered_queries"])
+        st.dataframe(df)
+    else:
+        st.success("✅ No unanswered questions at the moment.")
+
+    st.markdown("---")
+    st.markdown("### 📊 BI Dashboard: Query Insights")
+    total_queries = len(st.session_state["unanswered_queries"])
+    sent_requests = st.session_state.get("sent_results", [])
+    total_sent = len(sent_requests)
+
+    col1, col2 = st.columns(2)
+    col1.metric("Total Unanswered Queries", total_queries)
+    col2.metric("Total Sent Result Requests", total_sent)
+
+    if total_queries > 0:
+        query_df = pd.DataFrame(st.session_state["unanswered_queries"])
+        st.bar_chart(query_df["timestamp"].str[:10].value_counts().sort_index())
+
+    st.markdown("---")
+    st.markdown("### 📄 Log of Sent Result Requests")
+    if "sent_results" not in st.session_state:
+        st.session_state["sent_results"] = []  # Placeholder for future logging logic
+    if st.session_state["sent_results"]:
+        result_df = pd.DataFrame(st.session_state["sent_results"])
+        st.dataframe(result_df)
+    else:
+        st.info("📭 No result emails sent yet.")
+
+    st.stop()
     if st.sidebar.button("🚪 Logout"):
         confirm = st.sidebar.radio("Confirm logout?", ["No", "Yes"], index=0)
         if confirm == "Yes":
