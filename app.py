@@ -133,6 +133,157 @@ if mode == "Admin":
 
     st.stop()
 
+# ------------------- Public User Section -------------------
+st.markdown("---")
+st.subheader("1️⃣ Get Your Result Slip")
+reg_no = st.text_input("🎓 Registration Number")
+student_email = st.text_input("📧 Your Email")
+
+if st.button("📬 Send My Result"):
+    if not os.path.exists(PDF_FILE):
+        st.error("Result file not found on server.")
+    elif not reg_no:
+        st.warning("Please enter your Registration Number.")
+    elif not student_email or "@" not in student_email:
+        st.warning("Please enter a valid email address.")
+    else:
+        text, pdf_path = extract_result_page(PDF_FILE, reg_no)
+        if text and pdf_path:
+            st.text_area("📄 Result Preview", text, height=300)
+            send_result_email(student_email, text, pdf_path)
+            if "sent_results" not in st.session_state:
+                st.session_state["sent_results"] = []
+            st.session_state["sent_results"].append({
+                "registration_number": reg_no,
+                "email": student_email,
+                "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            })
+        else:
+            st.warning("❌ No results found for that Registration Number.")
+
+st.markdown("---")
+st.subheader("2️⃣ Ask About ITVET")
+user_question = st.text_input("❓ Your Question")
+faq_response_rules = {
+    "entry": "📌 Entry Requirements:
+- Diploma: KCSE C- and above
+- Certificate: KCSE D plain and above",
+    "certificate": "🎓 Certificate Courses:
+- Cooperative Management
+- Business Management",
+    "diploma": "🎓 Diploma Courses:
+- Accounting & Finance, HR, IT, CS, Cyber Security, Tourism, Social Work, Supply Chain, PM, Cooperative Management…",
+    "mission": "🎯 Mission: To provide quality education in business and economics through training, research, consultancy and linkages for sustainable economic empowerment.",
+    "vision": "👁️ Vision: To be the school of choice in business and economics in Kenya.",
+    "objective": "🎯 Objectives:
+• Offer market-oriented programs
+• Promote research
+• Equip students with skills
+• Enhance innovation & partnerships",
+    "service": "🛎️ Service Charter Highlights:
+• Missing Marks: 2 weeks
+• Result Slip: 15 minutes post-approval
+• Academic Certificates: 30 working days",
+    "missing marks": "🛎️ Kindly use the Results tab to submit a missing marks request.",
+    "location": "📍 Campus: Karen, 20km from Nairobi CBD, on a 50-acre serene environment.",
+    "events": "📅 Events: TVET Reforms, Career Fairs, CDAAC Exams, Apprenticeship Program.",
+    "courses": "🎓 ITVET Offers:
+- Diploma in Computer Science, Applied Statistics, Cyber Security, Information Technology
+- Diploma in Cooperative Management, Agribusiness, Credit Management, Project Management, Supply Chain, Tourism, Catering, Social Work and more.",
+    "school": "🏫 ITVET is part of The Co-operative University of Kenya, located in Karen, Nairobi — a serene 50-acre learning environment about 20km from the CBD.",
+    "departments": "📚 ITVET has two departments:
+- Department of Computing & Mathematical Sciences
+- Department of Co-operatives, Business & Management Studies",
+    "admission": "📝 Admission:
+- Certificate: KCSE D plain
+- Diploma: KCSE C-
+- Fee: Ksh 500
+- Issued within 8 weeks after advert",
+    "results": "📄 Result slips: Issued free 15 minutes post-approval
+Transcripts and certificates: Within 30 working days",
+    "service charter": "📋 Charter:
+- Inquiries: Verbal (1 day), Email (2 days)
+- Missing Marks: 2 weeks
+- Certificates: 30 days
+- Disciplinary: 30 days
+- Clearance: 2 days"
+}
+
+if st.button("🔍 Get Answer"):
+    reply = None
+    for key, text in faq_response_rules.items():
+        if key in user_question.lower():
+            reply = text
+            break
+    if reply:
+        st.text_area("🤖 Answer", reply, height=200)
+    else:
+        st.warning("🤔 We could not find an answer. Please enter your email for admin follow-up.")
+        email = st.text_input("📧 Your Email")
+        if email and "@" in email:
+            if "user_queries" not in st.session_state:
+                st.session_state["user_queries"] = []
+            st.session_state["user_queries"].append({
+                "email": email,
+                "question": user_question,
+                "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            })
+            st.success("✅ Your query has been submitted. You will receive a response soon.")
+        elif email:
+            st.warning("⚠️ Please enter a valid email address.")
+
+    if st.sidebar.button("🚪 Logout"):
+        confirm = st.sidebar.radio("Confirm logout?", ["No", "Yes"], index=0)
+        if confirm == "Yes":
+            st.session_state["admin"] = False
+            st.success("👋 You have been logged out successfully.")
+            st.experimental_rerun()
+
+    st.title("🛡️ ITVET Admin Dashboard")
+
+    st.markdown("### 📊 BI Dashboard: Query Insights")
+    total_queries = len(st.session_state.get("user_queries", []))
+    sent_requests = st.session_state.get("sent_results", [])
+    total_sent = len(sent_requests)
+
+    col1, col2 = st.columns(2)
+    col1.metric("Total Unanswered Queries", total_queries)
+    col2.metric("Total Sent Result Requests", total_sent)
+
+    if total_queries > 0:
+        query_df = pd.DataFrame(st.session_state.get("user_queries", []))
+        for index, row in query_df.iterrows():
+            with st.expander(f"📩 {row['email']} | {row['timestamp']}"):
+                st.write(f"**Question:** {row['question']}")
+                response_key = f"response_{index}"
+                response = st.text_area("✍️ Enter response", key=response_key)
+                if st.button("📤 Send Response", key=f"send_{index}"):
+                    try:
+                        msg = MIMEMultipart()
+                        msg["From"] = SMTP_USER
+                        msg["To"] = row['email']
+                        msg["Subject"] = "Response to Your ITVET Inquiry"
+                        msg.attach(MIMEText(response, "plain"))
+                        with smtplib.SMTP("smtp.gmail.com", 587) as smtp:
+                            smtp.starttls()
+                            smtp.login(SMTP_USER, SMTP_PASSWORD)
+                            smtp.sendmail(SMTP_USER, row['email'], msg.as_string())
+                        st.success(f"✅ Response sent to {row['email']}")
+                    except Exception as e:
+                        st.error(f"❌ Failed to send email: {e}")
+
+    st.markdown("---")
+    st.markdown("### 📄 Log of Sent Result Requests")
+    if "sent_results" not in st.session_state:
+        st.session_state["sent_results"] = []
+    if st.session_state["sent_results"]:
+        result_df = pd.DataFrame(st.session_state["sent_results"])
+        st.dataframe(result_df)
+    else:
+        st.info("📭 No result emails sent yet.")
+
+    st.stop()
+
     
 
     
@@ -247,7 +398,7 @@ if mode == "Admin":
         st.success("✅ No unanswered questions at the moment.")
 
     st.markdown("---")
-    st.markdown("### 📊 BI Dashboard: Query Insights")
+    st.markdown("Admin Dashboard: Query Insights")
     total_queries = len(st.session_state["unanswered_queries"])
     sent_requests = st.session_state.get("sent_results", [])
     total_sent = len(sent_requests)
