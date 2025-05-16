@@ -87,12 +87,12 @@ if mode == "Admin":
         login()
         st.stop()
     if st.sidebar.button("🚪 Logout"):
-        if st.sidebar.confirm("Are you sure you want to logout?"):
+        confirm = st.sidebar.radio("Confirm logout?", ["No", "Yes"], index=0)
+        if confirm == "Yes":
             st.session_state["admin"] = False
             st.experimental_rerun()
     
-    else:
-                st.title("🛡️ ITVET Admin Dashboard")
+    st.title("🛡️ ITVET Admin Dashboard")
 
         st.markdown("### 📬 Unanswered Queries")
         if st.session_state["unanswered_queries"]:
