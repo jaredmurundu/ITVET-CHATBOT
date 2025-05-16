@@ -5,17 +5,39 @@ import os
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.mime.application import MIMEApplication
+from datetime import datetime
+import pandas as pd
 
-# —————— Configuration ——————
-PDF_FILE = os.path.join(os.getcwd(), "sample_results.pdf")
+# ------------------- In-Memory Admin Setup -------------------
 ADMIN_EMAIL = "jmurundu@cuk.ac.ke"
-SMTP_USER = "jmurundu@cuk.ac.ke"
-SMTP_PASSWORD = "ylnf zlwk dvnr bqns"  # Use app password if Gmail
+ADMIN_PASSWORD = "34262059"
+PDF_FILE = os.path.join(os.getcwd(), "sample_results.pdf")
+SMTP_USER = ADMIN_EMAIL
+SMTP_PASSWORD = "ylnf zlwk dvnr bqns"
 
-st.set_page_config(page_title="ITVET Smart Chatbot", page_icon="🤖")
-st.markdown("<h1 style='text-align: center;'>🤖 THE ITVET-CUK</h1>", unsafe_allow_html=True)
+# ------------------- Session Data -------------------
+if "admin" not in st.session_state:
+    st.session_state["admin"] = False
+if "unanswered_queries" not in st.session_state:
+    st.session_state["unanswered_queries"] = [
+        {"email": "student1@example.com", "question": "What is the deadline for fee payment?", "timestamp": "2024-05-01 10:23:45"},
+        {"email": "student2@example.com", "question": "How do I register for resits?", "timestamp": "2024-05-02 11:15:30"},
+        {"email": "student3@example.com", "question": "Is there weekend learning?", "timestamp": "2024-05-03 14:05:10"}
+    ]
 
-# —————— Function: Extract Result Page ——————
+# ------------------- Admin Login -------------------
+def login():
+    st.sidebar.subheader("🔐 Admin Login")
+    username = st.sidebar.text_input("Email")
+    password = st.sidebar.text_input("Password", type="password")
+    if st.sidebar.button("Login"):
+        if username == ADMIN_EMAIL and password == ADMIN_PASSWORD:
+            st.session_state["admin"] = True
+            st.success("✅ Logged in successfully!")
+        else:
+            st.error("❌ Invalid credentials")
+
+# ------------------- Function: Extract PDF Page -------------------
 def extract_result_page(pdf_path, reg_no):
     try:
         doc = fitz.open(pdf_path)
@@ -34,7 +56,7 @@ def extract_result_page(pdf_path, reg_no):
         st.error(f"Error extracting result: {e}")
         return None, None
 
-# —————— Function: Send Result Email ——————
+# ------------------- Function: Send Email -------------------
 def send_result_email(to_email, body_text, attachment_path):
     msg = MIMEMultipart()
     msg["From"] = SMTP_USER
@@ -54,37 +76,26 @@ def send_result_email(to_email, body_text, attachment_path):
     except Exception as e:
         st.error(f"❌ Failed to send result: {e}")
 
-# —————— Function: Notify Admin of Unanswered Question ——————
-def send_unanswered_question_to_admin(question, user_email):
-    subject = f"❓ Unanswered Chatbot Question from [{user_email}]"
-    body = (
-        f"A student asked a question the bot could not answer:\n\n"
-        f"Question: {question}\n"
-        f"Student Email: {user_email}\n\n"
-        f"Please reply directly to the student."
-    )
-    msg = MIMEMultipart()
-    msg["From"] = SMTP_USER
-    msg["To"] = ADMIN_EMAIL
-    msg["Subject"] = subject
-    msg["Reply-To"] = user_email
-    msg.attach(MIMEText(body, "plain"))
-    try:
-        with smtplib.SMTP("smtp.gmail.com", 587) as smtp:
-            smtp.starttls()
-            smtp.login(SMTP_USER, SMTP_PASSWORD)
-            smtp.sendmail(SMTP_USER, ADMIN_EMAIL, msg.as_string())
-        st.success("✅ Your question has been sent to the admin. You will receive a reply via email.")
-    except Exception as e:
-        st.error(f"❌ Failed to notify admin: {e}")
+# ------------------- Main App -------------------
+st.title("🤖 ITVET-CUK Smart Chatbot")
 
-# —————— UI: Result Request ——————
-st.markdown("#### 1. Get Your Result Slip")
-col1, col2 = st.columns(2)
-with col1:
-    reg_no = st.text_input("🎓 Registration Number", key="reg")
-with col2:
-    student_email = st.text_input("📧 Your Email", key="email")
+# Admin Login
+if not st.session_state["admin"]:
+    login()
+else:
+    st.sidebar.success("👋 Welcome Admin")
+    st.subheader("📬 Unanswered Queries Table")
+    if st.session_state["unanswered_queries"]:
+        df = pd.DataFrame(st.session_state["unanswered_queries"])
+        st.dataframe(df)
+    else:
+        st.info("✅ No unanswered questions at the moment.")
+
+# ------------------- Public Result Slip Section -------------------
+st.markdown("---")
+st.subheader("1️⃣ Get Your Result Slip")
+reg_no = st.text_input("🎓 Registration Number")
+student_email = st.text_input("📧 Your Email")
 
 if st.button("📬 Send My Result"):
     if not os.path.exists(PDF_FILE):
@@ -101,28 +112,53 @@ if st.button("📬 Send My Result"):
         else:
             st.warning("❌ No results found for that Registration Number.")
 
-# —————— UI: FAQ Chatbot ——————
+# ------------------- Public FAQ Section -------------------
 st.markdown("---")
-st.markdown("#### 2. Ask About ITVET (general inquiries)")
-user_question = st.text_input("❓ Welcome to the ITVET-CUK: How may I help you?", key="faq")
-
+st.subheader("2️⃣ Ask About ITVET")
+user_question = st.text_input("❓ Your Question")
 faq_response_rules = {
-    "entry": "📌 Entry Requirements:\n- Diploma: KCSE C- and above\n- Certificate: KCSE D plain and above",
-    "certificate": "🎓 Certificate Courses:\n- Cooperative Management\n- Business Management",
-    "diploma": "🎓 Diploma Courses:\n- Accounting & Finance, HR, IT, CS, Cyber Security, Tourism, Social Work, Supply Chain, PM, Cooperative Management…",
+    "entry": "📌 Entry Requirements:
+- Diploma: KCSE C- and above
+- Certificate: KCSE D plain and above",
+    "certificate": "🎓 Certificate Courses:
+- Cooperative Management
+- Business Management",
+    "diploma": "🎓 Diploma Courses:
+- Accounting & Finance, HR, IT, CS, Cyber Security, Tourism, Social Work, Supply Chain, PM, Cooperative Management…",
     "mission": "🎯 Mission: To provide quality education in business and economics through training, research, consultancy and linkages for sustainable economic empowerment.",
     "vision": "👁️ Vision: To be the school of choice in business and economics in Kenya.",
-    "objective": "🎯 Objectives:\n• Offer market-oriented programs\n• Promote research\n• Equip students with skills\n• Enhance innovation & partnerships",
-    "service": "🛎️ Service Charter Highlights:\n• Missing Marks: 2 weeks\n• Result Slip: 15 minutes post-approval\n• Academic Certificates: 30 working days",
+    "objective": "🎯 Objectives:
+• Offer market-oriented programs
+• Promote research
+• Equip students with skills
+• Enhance innovation & partnerships",
+    "service": "🛎️ Service Charter Highlights:
+• Missing Marks: 2 weeks
+• Result Slip: 15 minutes post-approval
+• Academic Certificates: 30 working days",
     "missing marks": "🛎️ Kindly use the Results tab to submit a missing marks request.",
     "location": "📍 Campus: Karen, 20km from Nairobi CBD, on a 50-acre serene environment.",
     "events": "📅 Events: TVET Reforms, Career Fairs, CDAAC Exams, Apprenticeship Program.",
-    "courses": "🎓 ITVET Offers:\n- Diploma in Computer Science, Applied Statistics, Cyber Security, Information Technology\n- Diploma in Cooperative Management, Agribusiness, Credit Management, Project Management, Supply Chain, Tourism, Catering, Social Work and more.",
+    "courses": "🎓 ITVET Offers:
+- Diploma in Computer Science, Applied Statistics, Cyber Security, Information Technology
+- Diploma in Cooperative Management, Agribusiness, Credit Management, Project Management, Supply Chain, Tourism, Catering, Social Work and more.",
     "school": "🏫 ITVET is part of The Co-operative University of Kenya, located in Karen, Nairobi — a serene 50-acre learning environment about 20km from the CBD.",
-    "departments": "📚 ITVET has two departments:\n- Department of Computing & Mathematical Sciences\n- Department of Co-operatives, Business & Management Studies",
-    "admission": "📝 Admission:\n- Certificate: KCSE D plain\n- Diploma: KCSE C-\n- Fee: Ksh 500\n- Issued within 8 weeks after advert",
-    "results": "📄 Result slips: Issued free 15 minutes post-approval\nTranscripts and certificates: Within 30 working days",
-    "service charter": "📋 Charter:\n- Inquiries: Verbal (1 day), Email (2 days)\n- Missing Marks: 2 weeks\n- Certificates: 30 days\n- Disciplinary: 30 days\n- Clearance: 2 days"
+    "departments": "📚 ITVET has two departments:
+- Department of Computing & Mathematical Sciences
+- Department of Co-operatives, Business & Management Studies",
+    "admission": "📝 Admission:
+- Certificate: KCSE D plain
+- Diploma: KCSE C-
+- Fee: Ksh 500
+- Issued within 8 weeks after advert",
+    "results": "📄 Result slips: Issued free 15 minutes post-approval
+Transcripts and certificates: Within 30 working days",
+    "service charter": "📋 Charter:
+- Inquiries: Verbal (1 day), Email (2 days)
+- Missing Marks: 2 weeks
+- Certificates: 30 days
+- Disciplinary: 30 days
+- Clearance: 2 days"
 }
 
 if st.button("🔍 Get Answer"):
@@ -134,21 +170,14 @@ if st.button("🔍 Get Answer"):
     if reply:
         st.text_area("🤖 Answer", reply, height=200)
     else:
-        st.warning("🤔 Will it be okay if we responded to this later? Please enter your email so that the admin can reply:")
-        ua = st.text_input("📧 Please enter your Email address for Admin Reply", key="faq_email")
-        if ua and "@" in ua:
-            send_unanswered_question_to_admin(user_question, ua)
-        elif ua:
+        st.warning("🤔 We could not find an answer. Please enter your email for admin follow-up.")
+        email = st.text_input("📧 Your Email")
+        if email and "@" in email:
+            st.session_state["unanswered_queries"].append({
+                "email": email,
+                "question": user_question,
+                "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            })
+            st.success("✅ Your query has been submitted. You will receive a response soon.")
+        elif email:
             st.warning("⚠️ Please enter a valid email address.")
-
-# —————— Footer ——————
-st.markdown("---")
-st.markdown(
-    """
-    <div style='text-align: center; margin-top: 30px; font-size: 14px;'>
-      👨‍💻 Developed for ITVET-CUK by <strong>Jared Murundu</strong><br>
-      📊 Data Scientist | 💻 Software Developer
-    </div>
-    """,
-    unsafe_allow_html=True
-)
