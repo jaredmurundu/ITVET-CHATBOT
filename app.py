@@ -77,6 +77,7 @@ def send_result_email(to_email, body_text, attachment_path):
         st.error(f"❌ Failed to send result: {e}")
 
 # ------------------- Main App -------------------
+st.set_page_config(page_title="ITVET Chatbot", page_icon="🤖")
 st.title("🤖 ITVET-CUK Smart Chatbot")
 
 mode = st.radio("Select User Type", ["User", "Admin"], horizontal=True)
@@ -86,8 +87,7 @@ if mode == "Admin":
         login()
         st.stop()
     else:
-        st.set_page_config(page_title="Admin Dashboard", page_icon="🛡️")
-        st.title("🛡️ ITVET Admin Dashboard")
+                st.title("🛡️ ITVET Admin Dashboard")
 
         st.markdown("### 📬 Unanswered Queries")
         if st.session_state["unanswered_queries"]:
