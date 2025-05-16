@@ -81,6 +81,10 @@ if mode == "Admin":
         login()
         st.stop()
 
+    
+
+    
+
     if st.sidebar.button("🚪 Logout"):
         confirm = st.sidebar.radio("Confirm logout?", ["No", "Yes"], index=0)
         if confirm == "Yes":
