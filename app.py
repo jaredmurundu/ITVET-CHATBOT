@@ -79,17 +79,48 @@ def send_result_email(to_email, body_text, attachment_path):
 # ------------------- Main App -------------------
 st.title("🤖 ITVET-CUK Smart Chatbot")
 
-# Admin Login
-if not st.session_state["admin"]:
-    login()
-else:
-    st.sidebar.success("👋 Welcome Admin")
-    st.subheader("📬 Unanswered Queries Table")
-    if st.session_state["unanswered_queries"]:
-        df = pd.DataFrame(st.session_state["unanswered_queries"])
-        st.dataframe(df)
+mode = st.radio("Select User Type", ["User", "Admin"], horizontal=True)
+
+if mode == "Admin":
+    if not st.session_state["admin"]:
+        login()
+        st.stop()
     else:
-        st.info("✅ No unanswered questions at the moment.")
+        st.set_page_config(page_title="Admin Dashboard", page_icon="🛡️")
+        st.title("🛡️ ITVET Admin Dashboard")
+
+        st.markdown("### 📬 Unanswered Queries")
+        if st.session_state["unanswered_queries"]:
+            df = pd.DataFrame(st.session_state["unanswered_queries"])
+            st.dataframe(df)
+        else:
+            st.success("✅ No unanswered questions at the moment.")
+
+        st.markdown("---")
+        st.markdown("### 📊 BI Dashboard: Query Insights")
+        total_queries = len(st.session_state["unanswered_queries"])
+        sent_requests = st.session_state.get("sent_results", [])
+        total_sent = len(sent_requests)
+
+        col1, col2 = st.columns(2)
+        col1.metric("Total Unanswered Queries", total_queries)
+        col2.metric("Total Sent Result Requests", total_sent)
+
+        if total_queries > 0:
+            query_df = pd.DataFrame(st.session_state["unanswered_queries"])
+            st.bar_chart(query_df["timestamp"].str[:10].value_counts().sort_index())
+
+        st.markdown("---")
+        st.markdown("### 📄 Log of Sent Result Requests")
+        if "sent_results" not in st.session_state:
+            st.session_state["sent_results"] = []  # Placeholder for future logging logic
+        if st.session_state["sent_results"]:
+            result_df = pd.DataFrame(st.session_state["sent_results"])
+            st.dataframe(result_df)
+        else:
+            st.info("📭 No result emails sent yet.")
+
+        st.stop()
 
 # ------------------- Public Result Slip Section -------------------
 st.markdown("---")
@@ -109,6 +140,13 @@ if st.button("📬 Send My Result"):
         if text and pdf_path:
             st.text_area("📄 Result Preview", text, height=300)
             send_result_email(student_email, text, pdf_path)
+            if "sent_results" not in st.session_state:
+                st.session_state["sent_results"] = []
+            st.session_state["sent_results"].append({
+                "registration_number": reg_no,
+                "email": student_email,
+                "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            })
         else:
             st.warning("❌ No results found for that Registration Number.")
 
