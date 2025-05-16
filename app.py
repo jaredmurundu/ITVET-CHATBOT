@@ -165,6 +165,7 @@ st.markdown("---")
 st.subheader("2️⃣ Ask About ITVET")
 user_question = st.text_input("❓ Your Question")
 faq_response_rules = {
+    "entry": "📌 Entry Requirements:\n- Diploma: KCSE C- and above\n- Certificate: KCSE D plain and above",
     "entry": "📌 Entry Requirements:
 - Diploma: KCSE C- and above
 - Certificate: KCSE D plain and above",
@@ -398,7 +399,7 @@ if st.button("🔍 Get Answer"):
         st.success("✅ No unanswered questions at the moment.")
 
     st.markdown("---")
-    st.markdown("Admin Dashboard: Query Insights")
+    st.markdown("### 📊 BI Dashboard: Query Insights")
     total_queries = len(st.session_state["unanswered_queries"])
     sent_requests = st.session_state.get("sent_results", [])
     total_sent = len(sent_requests)
