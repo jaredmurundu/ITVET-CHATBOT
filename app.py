@@ -7,6 +7,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.mime.application import MIMEApplication
 from datetime import datetime
+import pandas as pd
 
 # ------------------- Admin Setup -------------------
 ADMIN_EMAIL = "jmurundu@cuk.ac.ke"
@@ -16,11 +17,10 @@ PDF_FILE = "sample_results.pdf"
 SMTP_USER = ADMIN_EMAIL
 SMTP_PASSWORD = "ylnf zlwk dvnr bqns"
 
-# ------------------- Session Data -------------------
 if "admin" not in st.session_state:
     st.session_state["admin"] = False
 
-# ------------------- PDF Downloader -------------------
+# ------------------- Download PDF -------------------
 def download_pdf_from_github():
     try:
         if not os.path.exists(PDF_FILE):
@@ -35,11 +35,11 @@ def download_pdf_from_github():
 def extract_result_page(pdf_path, reg_no):
     try:
         doc = fitz.open(pdf_path)
-        cleaned_reg = reg_no.replace("/", "").replace(" ", "").strip().lower()
+        cleaned_input = reg_no.replace(" ", "").replace("/", "").lower()
         for i, page in enumerate(doc):
             text = page.get_text("text")
-            check_text = text.replace(" ", "").replace("\n", "").lower()
-            if cleaned_reg in check_text:
+            cleaned_page = text.replace(" ", "").replace("\n", "").replace("/", "").lower()
+            if cleaned_input in cleaned_page:
                 out_pdf = f"Result_{reg_no.replace('/', '_')}.pdf"
                 result_doc = fitz.open()
                 result_doc.insert_pdf(doc, from_page=i, to_page=i)
@@ -82,7 +82,7 @@ def login():
         else:
             st.error("❌ Invalid credentials")
 
-# ------------------- App UI -------------------
+# ------------------- App Layout -------------------
 st.set_page_config(page_title="ITVET Chatbot", page_icon="🤖")
 st.markdown("<h1 style='text-align: center;'>🤖 ITVET-CUK Smart Chatbot</h1>", unsafe_allow_html=True)
 
@@ -92,8 +92,19 @@ if mode == "Admin":
     if not st.session_state["admin"]:
         login()
         st.stop()
+    st.subheader("📥 Unanswered Questions Log")
+    if "user_queries" in st.session_state and st.session_state["user_queries"]:
+        st.dataframe(pd.DataFrame(st.session_state["user_queries"]))
+    else:
+        st.info("✅ No unanswered questions yet.")
 
-# ------------------- Result Slip Section -------------------
+    st.subheader("📛 Failed Result Lookup Log")
+    if "failed_results" in st.session_state and st.session_state["failed_results"]:
+        st.dataframe(pd.DataFrame(st.session_state["failed_results"]))
+    else:
+        st.info("✅ No failed result requests.")
+
+# ------------------- Result Section -------------------
 st.markdown("---")
 st.markdown("<h3 style='text-align: center;'>1️⃣ Get Your Result Slip</h3>", unsafe_allow_html=True)
 
@@ -112,6 +123,13 @@ if st.button("📬 Send My Result"):
             st.text_area("📄 Result Preview", text, height=300)
             send_result_email(student_email, text, pdf_path)
         else:
+            if "failed_results" not in st.session_state:
+                st.session_state["failed_results"] = []
+            st.session_state["failed_results"].append({
+                "reg_no": reg_no,
+                "email": student_email,
+                "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            })
             st.warning("❌ No results found for that Registration Number.")
 
 # ------------------- Chatbot Section -------------------
