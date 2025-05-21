@@ -163,7 +163,6 @@ if st.button("🔍 Get Answer"):
 
 # ------------------- Footer -------------------
 st.markdown("""
----
 <div style='text-align: center;'>
 👨‍💻 Developed for <strong>ITVET-CUK</strong> by <strong><a href='https://www.linkedin.com/in/jared-murundu-07738b23a/' target='_blank'>Jared Murundu</a></strong><br>
 📊 Data Scientist | 💻 Software Developer
