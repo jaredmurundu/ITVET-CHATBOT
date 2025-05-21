@@ -166,7 +166,7 @@ if st.button("🔍 Get Answer"):
         st.text_area("🤖 Answer", reply, height=200)
     else:
         st.warning("🤔 We could not find an answer. Please enter your email for admin follow-up.")
-        email = st.text_input("📧 Your Email")
+        email = st.text_input("📧 Your Email", key="unanswered_email_input")
         if email and "@" in email:
             if "user_queries" not in st.session_state:
                 st.session_state["user_queries"] = []
