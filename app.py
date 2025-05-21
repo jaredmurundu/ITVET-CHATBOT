@@ -2,16 +2,17 @@ import streamlit as st
 import fitz  # PyMuPDF
 import smtplib
 import os
+import requests
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.mime.application import MIMEApplication
 from datetime import datetime
-import pandas as pd
 
-# ------------------- In-Memory Admin Setup -------------------
+# ------------------- Admin Setup -------------------
 ADMIN_EMAIL = "jmurundu@cuk.ac.ke"
 ADMIN_PASSWORD = "34262059"
-PDF_FILE = os.path.join(os.getcwd(), "sample_results.pdf")
+RAW_GITHUB_PDF = "https://raw.githubusercontent.com/jaredmurundu/ITVET-CHATBOT/main/sample_results.pdf"
+PDF_FILE = "sample_results.pdf"
 SMTP_USER = ADMIN_EMAIL
 SMTP_PASSWORD = "ylnf zlwk dvnr bqns"
 
@@ -19,27 +20,26 @@ SMTP_PASSWORD = "ylnf zlwk dvnr bqns"
 if "admin" not in st.session_state:
     st.session_state["admin"] = False
 
-# ------------------- Admin Login -------------------
-def login():
-    st.sidebar.subheader("🔐 Admin Login")
-    username = st.sidebar.text_input("Email")
-    password = st.sidebar.text_input("Password", type="password")
-    if st.sidebar.button("Login"):
-        if username == ADMIN_EMAIL and password == ADMIN_PASSWORD:
-            st.session_state["admin"] = True
-            st.success("✅ Logged in successfully!")
-        else:
-            st.error("❌ Invalid credentials")
+# ------------------- PDF Downloader -------------------
+def download_pdf_from_github():
+    try:
+        if not os.path.exists(PDF_FILE):
+            response = requests.get(RAW_GITHUB_PDF)
+            with open(PDF_FILE, "wb") as f:
+                f.write(response.content)
+            print("✅ Downloaded latest results from GitHub.")
+    except Exception as e:
+        st.error(f"❌ Could not fetch results PDF: {e}")
 
-# ------------------- Function: Extract PDF Page -------------------
+# ------------------- PDF Extractor -------------------
 def extract_result_page(pdf_path, reg_no):
     try:
         doc = fitz.open(pdf_path)
-        for i in range(len(doc)):
-            text = doc[i].get_text("text")
-            cleaned_text = text.replace(" ", "").replace("\n", "").lower()
-            cleaned_reg = reg_no.replace("/", "").replace(" ", "").lower()
-            if cleaned_reg in cleaned_text:
+        cleaned_reg = reg_no.replace("/", "").replace(" ", "").strip().lower()
+        for i, page in enumerate(doc):
+            text = page.get_text("text")
+            check_text = text.replace(" ", "").replace("\n", "").lower()
+            if cleaned_reg in check_text:
                 out_pdf = f"Result_{reg_no.replace('/', '_')}.pdf"
                 result_doc = fitz.open()
                 result_doc.insert_pdf(doc, from_page=i, to_page=i)
@@ -50,7 +50,7 @@ def extract_result_page(pdf_path, reg_no):
         st.error(f"Error extracting result: {e}")
         return None, None
 
-# ------------------- Function: Send Email -------------------
+# ------------------- Email Sender -------------------
 def send_result_email(to_email, body_text, attachment_path):
     msg = MIMEMultipart()
     msg["From"] = SMTP_USER
@@ -70,13 +70,21 @@ def send_result_email(to_email, body_text, attachment_path):
     except Exception as e:
         st.error(f"❌ Failed to send result: {e}")
 
-# ------------------- Main App -------------------
+# ------------------- Admin Login -------------------
+def login():
+    st.sidebar.subheader("🔐 Admin Login")
+    username = st.sidebar.text_input("Email")
+    password = st.sidebar.text_input("Password", type="password")
+    if st.sidebar.button("Login"):
+        if username == ADMIN_EMAIL and password == ADMIN_PASSWORD:
+            st.session_state["admin"] = True
+            st.success("✅ Logged in successfully!")
+        else:
+            st.error("❌ Invalid credentials")
 
-# 👨‍💻 Developed for ITVET-CUK by Jared Murundu
-# 📊 Data Scientist | 💻 Software Developer
+# ------------------- App UI -------------------
 st.set_page_config(page_title="ITVET Chatbot", page_icon="🤖")
 st.markdown("<h1 style='text-align: center;'>🤖 ITVET-CUK Smart Chatbot</h1>", unsafe_allow_html=True)
-
 
 mode = st.radio("Select User Type", ["User", "Admin"], horizontal=True)
 
@@ -85,20 +93,16 @@ if mode == "Admin":
         login()
         st.stop()
 
-    
-
-    
-
-# ------------------- Public User Section -------------------
+# ------------------- Result Slip Section -------------------
 st.markdown("---")
 st.markdown("<h3 style='text-align: center;'>1️⃣ Get Your Result Slip</h3>", unsafe_allow_html=True)
+
 reg_no = st.text_input("🎓 Registration Number")
 student_email = st.text_input("📧 Your Email")
 
 if st.button("📬 Send My Result"):
-    if not os.path.exists(PDF_FILE):
-        st.error("Result file not found on server.")
-    elif not reg_no:
+    download_pdf_from_github()
+    if not reg_no:
         st.warning("Please enter your Registration Number.")
     elif not student_email or "@" not in student_email:
         st.warning("Please enter a valid email address.")
@@ -107,18 +111,13 @@ if st.button("📬 Send My Result"):
         if text and pdf_path:
             st.text_area("📄 Result Preview", text, height=300)
             send_result_email(student_email, text, pdf_path)
-            if "sent_results" not in st.session_state:
-                st.session_state["sent_results"] = []
-            st.session_state["sent_results"].append({
-                "registration_number": reg_no,
-                "email": student_email,
-                "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            })
         else:
             st.warning("❌ No results found for that Registration Number.")
 
+# ------------------- Chatbot Section -------------------
 st.markdown("---")
 st.markdown("<h3 style='text-align: center;'>2️⃣ Ask About ITVET</h3>", unsafe_allow_html=True)
+
 user_question = st.text_input("❓ Your Question")
 faq_response_rules = {
     "entry": "📌 Entry Requirements:\n- Diploma: KCSE C- and above\n- Certificate: KCSE D plain and above",
@@ -169,25 +168,4 @@ st.markdown("""
 👨‍💻 Developed for <strong>ITVET-CUK</strong> by <strong><a href='https://www.linkedin.com/in/jared-murundu-07738b23a/' target='_blank'>Jared Murundu</a></strong><br>
 📊 Data Scientist | 💻 Software Developer
 </div>
----
 """, unsafe_allow_html=True)
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
