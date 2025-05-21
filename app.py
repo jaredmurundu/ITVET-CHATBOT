@@ -27,7 +27,6 @@ def download_pdf_from_github():
             response = requests.get(RAW_GITHUB_PDF)
             with open(PDF_FILE, "wb") as f:
                 f.write(response.content)
-            print("✅ Downloaded latest results from GitHub.")
     except Exception as e:
         st.error(f"❌ Could not fetch results PDF: {e}")
 
@@ -73,8 +72,8 @@ def send_result_email(to_email, body_text, attachment_path):
 # ------------------- Admin Login -------------------
 def login():
     st.sidebar.subheader("🔐 Admin Login")
-    username = st.sidebar.text_input("Email")
-    password = st.sidebar.text_input("Password", type="password")
+    username = st.sidebar.text_input("Email", key="admin_email")
+    password = st.sidebar.text_input("Password", type="password", key="admin_password")
     if st.sidebar.button("Login"):
         if username == ADMIN_EMAIL and password == ADMIN_PASSWORD:
             st.session_state["admin"] = True
@@ -108,8 +107,8 @@ if mode == "Admin":
 st.markdown("---")
 st.markdown("<h3 style='text-align: center;'>1️⃣ Get Your Result Slip</h3>", unsafe_allow_html=True)
 
-reg_no = st.text_input("🎓 Registration Number")
-student_email = st.text_input("📧 Your Email")
+reg_no = st.text_input("🎓 Registration Number", key="reg_number_input")
+student_email = st.text_input("📧 Your Email", key="results_email_input")
 
 if st.button("📬 Send My Result"):
     download_pdf_from_github()
@@ -136,7 +135,7 @@ if st.button("📬 Send My Result"):
 st.markdown("---")
 st.markdown("<h3 style='text-align: center;'>2️⃣ Ask About ITVET</h3>", unsafe_allow_html=True)
 
-user_question = st.text_input("❓ Your Question")
+user_question = st.text_input("❓ Your Question", key="general_query")
 faq_response_rules = {
     "entry": "📌 Entry Requirements:\n- Diploma: KCSE C- and above\n- Certificate: KCSE D plain and above",
     "certificate": "🎓 Certificate Courses:\n- Cooperative Management\n- Business Management",
@@ -181,8 +180,10 @@ if st.button("🔍 Get Answer"):
 
 # ------------------- Footer -------------------
 st.markdown("""
+---
 <div style='text-align: center;'>
 👨‍💻 Developed for <strong>ITVET-CUK</strong> by <strong><a href='https://www.linkedin.com/in/jared-murundu-07738b23a/' target='_blank'>Jared Murundu</a></strong><br>
 📊 Data Scientist | 💻 Software Developer
 </div>
+---
 """, unsafe_allow_html=True)
