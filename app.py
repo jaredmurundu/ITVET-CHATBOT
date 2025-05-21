@@ -136,6 +136,8 @@ st.markdown("---")
 st.markdown("<h3 style='text-align: center;'>2️⃣ Ask About ITVET</h3>", unsafe_allow_html=True)
 
 user_question = st.text_input("❓ Your Question", key="general_query")
+user_followup_email = st.text_input("📧 Your Email", key="unanswered_email_input")
+
 faq_response_rules = {
     "entry": "📌 Entry Requirements:\n- Diploma: KCSE C- and above\n- Certificate: KCSE D plain and above",
     "certificate": "🎓 Certificate Courses:\n- Cooperative Management\n- Business Management",
@@ -149,41 +151,4 @@ faq_response_rules = {
     "events": "📅 Events: TVET Reforms, Career Fairs, CDAAC Exams, Apprenticeship Program.",
     "courses": "🎓 ITVET Offers:\n- Diploma in Computer Science, Applied Statistics, Cyber Security, Information Technology\n- Diploma in Cooperative Management, Agribusiness, Credit Management, Project Management, Supply Chain, Tourism, Catering, Social Work and more.",
     "school": "🏫 ITVET is part of The Co-operative University of Kenya, located in Karen, Nairobi — a serene 50-acre learning environment about 20km from the CBD.",
-    "departments": "📚 ITVET has two departments:\n- Department of Computing & Mathematical Sciences\n- Department of Co-operatives, Business & Management Studies",
-    "admission": "📝 Admission:\n- Certificate: KCSE D plain\n- Diploma: KCSE C-\n- Fee: Ksh 500\n- Issued within 8 weeks after advert",
-    "results": "📄 Result slips: Issued free 15 minutes post-approval\nTranscripts and certificates: Within 30 working days",
-    "service charter": "📋 Charter:\n- Inquiries: Verbal (1 day), Email (2 days)\n- Missing Marks: 2 weeks\n- Certificates: 30 days\n- Disciplinary: 30 days\n- Clearance: 2 days"
-}
-
-if st.button("🔍 Get Answer"):
-    reply = None
-    for key, text in faq_response_rules.items():
-        if key in user_question.lower():
-            reply = text
-            break
-    if reply:
-        st.text_area("🤖 Answer", reply, height=200)
-    else:
-        st.warning("🤔 We could not find an answer. Please enter your email for admin follow-up.")
-        email = st.text_input("📧 Your Email", key="unanswered_email_input")
-        if email and "@" in email:
-            if "user_queries" not in st.session_state:
-                st.session_state["user_queries"] = []
-            st.session_state["user_queries"].append({
-                "email": email,
-                "question": user_question,
-                "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            })
-            st.success("✅ Your query has been submitted. You will receive a response soon.")
-        elif email:
-            st.warning("⚠️ Please enter a valid email address.")
-
-# ------------------- Footer -------------------
-st.markdown("""
----
-<div style='text-align: center;'>
-👨‍💻 Developed for <strong>ITVET-CUK</strong> by <strong><a href='https://www.linkedin.com/in/jared-murundu-07738b23a/' target='_blank'>Jared Murundu</a></strong><br>
-📊 Data Scientist | 💻 Software Developer
-</div>
----
-""", unsafe_allow_html=True)
+    "departments": "📚 ITVET has two departments:\n- Department of Computing & Mathematical Sciences\n- Department of Co-operatives, Business & Manageme
